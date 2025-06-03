@@ -158,7 +158,7 @@
             />
 
         <TextView
-            android:id="@+id/from_sign_to_login"
+            android:id="@+id/from_login_to_register"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/Sign_Up"

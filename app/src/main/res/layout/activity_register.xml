@@ -35,7 +35,7 @@
             android:background="@color/white"
             app:boxStrokeWidthFocused="0dp"
             app:hintEnabled="false">
-            Add<com.google.android.material.textfield.TextInputEditText
+            <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/emailEt"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -123,7 +123,7 @@
         android:text="@string/terms_text"
         android:textColor="#80000000"
         android:textSize="12dp"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="28dp"
         />
 
     <androidx.appcompat.widget.AppCompatButton
@@ -196,7 +196,7 @@
             />
 
         <TextView
-            android:id="@+id/from_login_to_sign"
+            android:id="@+id/from_register_to_login"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/Register"

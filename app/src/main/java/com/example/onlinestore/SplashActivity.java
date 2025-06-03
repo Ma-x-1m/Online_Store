@@ -3,6 +3,8 @@ package com.example.onlinestore;
 import android.os.Bundle;
 import android.content.Intent;
 import android.os.Handler;
+import android.view.WindowManager;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 
@@ -11,6 +13,7 @@ public class SplashActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         setContentView(R.layout.activity_splash);
 
         // Задержка на 3 секунды перед переходом к основному Activity
@@ -18,7 +21,7 @@ public class SplashActivity extends AppCompatActivity {
             @Override
             public void run() {
                 // Переход к основному Activity
-                Intent intent = new Intent(SplashActivity.this, MainActivity.class);
+                Intent intent = new Intent(SplashActivity.this, LoginActivity.class);
                 startActivity(intent);
 
                 // Закрытие SplashActivity

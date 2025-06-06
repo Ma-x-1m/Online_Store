@@ -18,14 +18,10 @@ public class LoginActivity extends AppCompatActivity {
 
         TextView fromLoginToRegister = findViewById(R.id.from_login_to_register);
 
-        fromLoginToRegister.setOnClickListener(new View.OnClickListener(){
-            public void onClick (View v) {
-                Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
-
-                startActivity(intent);
-
-                overridePendingTransition(R.anim.slide_in, R.anim.slide_out);
-            }
+        fromLoginToRegister.setOnClickListener(v -> {
+            startActivity(new Intent(this, RegisterActivity.class));
+            overridePendingTransition(R.anim.slide_in, R.anim.slide_out);
+            finish();
         });
 
     }

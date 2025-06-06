@@ -157,7 +157,7 @@
         android:layout_marginTop="10dp"
         >
         <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/google_login"
+            android:id="@+id/google_register"
             android:layout_width="54dp"
             android:layout_height="54dp"
             android:layout_gravity="center"
@@ -167,7 +167,7 @@
             />
 
         <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/facebook_login"
+            android:id="@+id/facebook_register"
             android:layout_width="54dp"
             android:layout_height="54dp"
             android:layout_marginStart="10dp"

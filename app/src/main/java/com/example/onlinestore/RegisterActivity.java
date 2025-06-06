@@ -2,6 +2,9 @@ package com.example.onlinestore;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
@@ -16,6 +19,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
@@ -55,8 +59,50 @@ public class RegisterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
+        FirebaseApp.initializeApp(this);
         auth = FirebaseAuth.getInstance();
 
+        // Email-поля
+        EditText emailEt = findViewById(R.id.emailEt);
+        EditText passEt = findViewById(R.id.passEt);
+        EditText confirmPassEt = findViewById(R.id.ConfirmPassEt);
+        AppCompatButton registerBtn = findViewById(R.id.register_bnt);
+
+        registerBtn.setOnClickListener(v -> {
+            String email = emailEt.getText().toString().trim();
+            String password = passEt.getText().toString().trim();
+            String confirmPassword = confirmPassEt.getText().toString().trim();
+
+            if (email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+                Toast.makeText(this, "Пожалуйста, заполните все поля", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (!password.equals(confirmPassword)) {
+                Toast.makeText(this, "Пароли не совпадают", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (password.length() < 6) {
+                Toast.makeText(this, "Пароль должен содержать минимум 6 символов", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            auth.createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            Log.d("Register", "Успешная регистрация");
+                            startActivity(new Intent(this, MainActivity.class));
+                            finish();
+                        } else {
+                            Exception e = task.getException();
+                            Log.e("Register", "Ошибка регистрации", e);
+                            Toast.makeText(this, "Ошибка: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        }
+                    });
+        });
+
+        //Регистрация через google account
         if (auth.getCurrentUser() != null) {
             startActivity(new Intent(this, MainActivity.class));
             finish();
@@ -71,5 +117,14 @@ public class RegisterActivity extends AppCompatActivity {
 
         AppCompatButton googleRegister = findViewById(R.id.google_register);
         googleRegister.setOnClickListener(v -> activityResultLauncher.launch(googleSignInClient.getSignInIntent()));
+
+        // Переход на логин
+        TextView loginLink = findViewById(R.id.from_register_to_login);
+        loginLink.setOnClickListener(v -> {
+            startActivity(new Intent(this, LoginActivity.class));
+            overridePendingTransition(R.anim.slide_in, R.anim.slide_out);
+            finish();
+        });
+
     }
 }

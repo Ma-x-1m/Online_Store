@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel;
 
 import com.example.onlinestore.Domain.BannerModel;
 import com.example.onlinestore.Domain.CategoryModel;
+import com.example.onlinestore.Domain.ItemsModel;
 import com.example.onlinestore.Repository.MainRepository;
 
 import java.util.ArrayList;
@@ -18,5 +19,9 @@ public class MainViewModel extends ViewModel {
 
     public LiveData<ArrayList<BannerModel>> loadBanner(){
         return repository.loadBanner();
+    }
+
+    public LiveData<ArrayList<ItemsModel>> loadPopular(){
+        return repository.loadPopular();
     }
 }

@@ -3,6 +3,7 @@ package com.example.onlinestore.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Patterns;
+import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -12,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 
 import com.example.onlinestore.R;
+import com.example.onlinestore.databinding.ActivityLoginBinding;
 import com.google.android.gms.auth.api.signin.*;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
@@ -19,6 +21,8 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.*;
 
 public class LoginActivity extends AppCompatActivity {
+
+    private ActivityLoginBinding binding;
 
     private TextInputEditText emailEt, passEt;
     private AppCompatButton loginBtn, googleLoginBtn;
@@ -39,7 +43,9 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(com.example.onlinestore.R.layout.activity_login);
+        binding = ActivityLoginBinding.inflate(getLayoutInflater());
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        setContentView(binding.getRoot());
 
         emailEt = findViewById(com.example.onlinestore.R.id.emailEt);
         passEt = findViewById(com.example.onlinestore.R.id.passEt);

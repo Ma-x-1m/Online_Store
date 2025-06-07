@@ -8,15 +8,19 @@ import android.view.WindowManager;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.onlinestore.R;
+import com.example.onlinestore.databinding.ActivitySplashBinding;
 
 
 public class SplashActivity extends AppCompatActivity {
 
+    private ActivitySplashBinding binding;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        binding = ActivitySplashBinding.inflate(getLayoutInflater());
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
-        setContentView(R.layout.activity_splash);
+        setContentView(binding.getRoot());
 
         // Задержка на 3 секунды перед переходом к основному Activity
         new Handler().postDelayed(new Runnable() {

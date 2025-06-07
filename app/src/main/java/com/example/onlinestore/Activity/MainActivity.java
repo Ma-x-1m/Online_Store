@@ -11,6 +11,7 @@ import androidx.viewpager2.widget.CompositePageTransformer;
 import androidx.viewpager2.widget.MarginPageTransformer;
 
 import com.example.onlinestore.Adapter.CategoryAdapter;
+import com.example.onlinestore.Adapter.PopularAdapter;
 import com.example.onlinestore.Adapter.SliderAdapter;
 import com.example.onlinestore.Domain.BannerModel;
 import com.example.onlinestore.R;
@@ -34,6 +35,21 @@ public class MainActivity extends AppCompatActivity {
         viewModel = new MainViewModel();
         initCategory();
         initSlider();
+        initPopular();
+    }
+
+    private void initPopular() {
+        binding.progressBarPopular.setVisibility(View.VISIBLE);
+        viewModel.loadPopular().observeForever(itemsModels -> {
+            if(!itemsModels.isEmpty()){
+                binding.popularView.setLayoutManager(new LinearLayoutManager
+                        (MainActivity.this, LinearLayoutManager.HORIZONTAL, false));
+                binding.popularView.setAdapter(new PopularAdapter(itemsModels));
+                binding.popularView.setNestedScrollingEnabled(true);
+            }
+            binding.progressBarPopular.setVisibility(View.GONE);
+        });
+        viewModel.loadPopular();
     }
 
     private void initSlider() {

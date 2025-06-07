@@ -30,6 +30,9 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
+    buildFeatures{
+        viewBinding = true
+    }
 
 }
 
@@ -39,6 +42,7 @@ dependencies {
 
     implementation ("com.github.bumptech.glide:glide:4.16.0")
     implementation("com.google.android.gms:play-services-auth:21.3.0")
+    implementation(libs.firebase.database)
 
     debugImplementation ("com.google.android.gms:play-services-auth:20.7.0")
     implementation(libs.appcompat)

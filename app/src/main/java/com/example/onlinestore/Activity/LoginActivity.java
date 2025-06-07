@@ -1,4 +1,4 @@
-package com.example.onlinestore;
+package com.example.onlinestore.Activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,6 +11,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 
+import com.example.onlinestore.R;
 import com.google.android.gms.auth.api.signin.*;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
@@ -38,19 +39,19 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        setContentView(com.example.onlinestore.R.layout.activity_login);
 
-        emailEt = findViewById(R.id.emailEt);
-        passEt = findViewById(R.id.passEt);
-        loginBtn = findViewById(R.id.login_btn);
-        googleLoginBtn = findViewById(R.id.google_login);
-        TextView fromLoginToRegister = findViewById(R.id.from_login_to_register);
+        emailEt = findViewById(com.example.onlinestore.R.id.emailEt);
+        passEt = findViewById(com.example.onlinestore.R.id.passEt);
+        loginBtn = findViewById(com.example.onlinestore.R.id.login_btn);
+        googleLoginBtn = findViewById(com.example.onlinestore.R.id.google_login);
+        TextView fromLoginToRegister = findViewById(com.example.onlinestore.R.id.from_login_to_register);
 
         mAuth = FirebaseAuth.getInstance();
 
         // Настройка входа через Google
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.client_id))
+                .requestIdToken(getString(com.example.onlinestore.R.string.client_id))
                 .requestEmail()
                 .build();
         googleSignInClient = GoogleSignIn.getClient(this, gso);
@@ -68,7 +69,7 @@ public class LoginActivity extends AppCompatActivity {
         // Переход к регистрации
         fromLoginToRegister.setOnClickListener(v -> {
             startActivity(new Intent(this, RegisterActivity.class));
-            overridePendingTransition(R.anim.slide_in, R.anim.slide_out);
+            overridePendingTransition(com.example.onlinestore.R.anim.slide_in, R.anim.slide_out);
             finish();
         });
     }

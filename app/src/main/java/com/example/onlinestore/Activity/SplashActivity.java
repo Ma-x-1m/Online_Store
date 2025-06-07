@@ -1,4 +1,4 @@
-package com.example.onlinestore;
+package com.example.onlinestore.Activity;
 
 import android.os.Bundle;
 import android.content.Intent;
@@ -6,6 +6,8 @@ import android.os.Handler;
 import android.view.WindowManager;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.onlinestore.R;
 
 
 public class SplashActivity extends AppCompatActivity {

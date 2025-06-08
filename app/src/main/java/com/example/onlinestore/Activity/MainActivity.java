@@ -1,5 +1,6 @@
 package com.example.onlinestore.Activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
@@ -48,6 +49,9 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+        binding.cartBtn.setOnClickListener(v -> startActivity
+                (new Intent(MainActivity.this, CartActivity.class)));
     }
 
     private void initPopular() {

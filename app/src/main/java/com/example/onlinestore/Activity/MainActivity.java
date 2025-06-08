@@ -17,6 +17,7 @@ import com.example.onlinestore.Domain.BannerModel;
 import com.example.onlinestore.R;
 import com.example.onlinestore.ViewModel.MainViewModel;
 import com.example.onlinestore.databinding.ActivityMainBinding;
+import com.ismaeldivita.chipnavigation.ChipNavigationBar;
 
 import java.util.ArrayList;
 
@@ -36,6 +37,17 @@ public class MainActivity extends AppCompatActivity {
         initCategory();
         initSlider();
         initPopular();
+        bottomNavigarion();
+    }
+
+    private void bottomNavigarion() {
+        binding.bottomNavigation.setItemSelected(R.id.home, true);
+        binding.bottomNavigation.setOnItemSelectedListener(new ChipNavigationBar.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(int i) {
+
+            }
+        });
     }
 
     private void initPopular() {

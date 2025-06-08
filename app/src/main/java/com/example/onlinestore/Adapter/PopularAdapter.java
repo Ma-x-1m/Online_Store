@@ -1,6 +1,7 @@
 package com.example.onlinestore.Adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Paint;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CenterInside;
 import com.bumptech.glide.request.RequestOptions;
+import com.example.onlinestore.Activity.DetailActivity;
 import com.example.onlinestore.Domain.ItemsModel;
 import com.example.onlinestore.databinding.ViewholderPopularBinding;
 
@@ -52,7 +54,14 @@ public class PopularAdapter extends RecyclerView.Adapter<PopularAdapter.Viewhold
                 .load(items.get(position).getPicUrl().get(0))
                 .apply(options)
                 .into(holder.binding.pic);
-
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context, DetailActivity.class);
+                intent.putExtra("object", items.get(position));
+                context.startActivity(intent);
+            }
+        });
     }
 
     @Override

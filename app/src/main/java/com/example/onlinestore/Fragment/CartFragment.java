@@ -1,66 +1,71 @@
 package com.example.onlinestore.Fragment;
 
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.example.onlinestore.R;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link CartFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+import com.example.onlinestore.Adapter.CartAdapter;
+import com.example.onlinestore.Helper.ManagmentCart;
+import com.example.onlinestore.databinding.FragmentCartBinding;
+
 public class CartFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    public CartFragment() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment CartFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static CartFragment newInstance(String param1, String param2) {
-        CartFragment fragment = new CartFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
+    private FragmentCartBinding binding;
+    private ManagmentCart managmentCart;
+    private double tax;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        binding = FragmentCartBinding.inflate(inflater, container, false);
+        managmentCart = new ManagmentCart(requireContext());
+
+        calculatorCart();
+        setVariable();
+        initCartList();
+
+        return binding.getRoot();
+    }
+
+    private void initCartList() {
+        if (managmentCart.getListCart().isEmpty()) {
+            binding.emptyTxt.setVisibility(View.VISIBLE);
+            binding.scrollView.setVisibility(View.GONE);
+        } else {
+            binding.emptyTxt.setVisibility(View.GONE);
+            binding.scrollView.setVisibility(View.VISIBLE);
         }
+
+        binding.cartView.setLayoutManager(new LinearLayoutManager(
+                requireContext(), LinearLayoutManager.VERTICAL, false));
+        binding.cartView.setAdapter(new CartAdapter(
+                managmentCart.getListCart(), requireContext(), this::calculatorCart));
+    }
+
+    private void setVariable() {
+        binding.backBtn.setOnClickListener(v -> requireActivity().onBackPressed());
+    }
+
+    private void calculatorCart() {
+        double percentTax = 0.02;
+        double delivery = 10;
+        tax = Math.round(managmentCart.getTotalFee() * percentTax * 100.0) / 100.0;
+
+        double total = Math.round((managmentCart.getTotalFee() + tax + delivery) * 100.0) / 100.0;
+        double itemTotal = Math.round(managmentCart.getTotalFee() * 100.0) / 100.0;
+
+        binding.totalFeeTxt.setText("$" + itemTotal);
+        binding.taxTxt.setText("$" + tax);
+        binding.deliveryTxt.setText("$" + delivery);
+        binding.totalTxt.setText("$" + total);
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_cart, container, false);
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
     }
 }

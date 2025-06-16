@@ -1,66 +1,94 @@
 package com.example.onlinestore.Fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.GridLayoutManager;
 
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.example.onlinestore.R;
+import com.example.onlinestore.Activity.CartActivity;
+import com.example.onlinestore.Adapter.FavouriteAdapter;
+import com.example.onlinestore.Domain.ItemsModel;
+import com.example.onlinestore.ViewModel.MainViewModel;
+import com.example.onlinestore.databinding.FragmentFavouriteBinding;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link FavouriteFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+
+import java.util.ArrayList;
+
 public class FavouriteFragment extends Fragment {
+    private FragmentFavouriteBinding binding;
+    private MainViewModel viewModel;
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    public FavouriteFragment() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment FavouriteFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static FavouriteFragment newInstance(String param1, String param2) {
-        FavouriteFragment fragment = new FavouriteFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
+    private ArrayList<ItemsModel> allFavouriteItems = new ArrayList<>();
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        binding = FragmentFavouriteBinding.inflate(inflater, container, false);
+
+        viewModel = new ViewModelProvider(this).get(MainViewModel.class);
+
+        binding.searchTxt.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                filterFavouriteItems(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) { }
+        });
+
+        initFavourite();
+        setupBottomNavigation();
+
+        return binding.getRoot();
+    }
+
+    private void setupBottomNavigation() {
+        binding.cartBtn.setOnClickListener(v ->
+                startActivity(new Intent(requireContext(), CartActivity.class)));
+    }
+
+    private void initFavourite() {
+        binding.progressBarPopular.setVisibility(View.VISIBLE);
+
+        viewModel.loadFavourites().observe(getViewLifecycleOwner(), favouriteItems -> {
+            if (favouriteItems != null && !favouriteItems.isEmpty()) {
+                allFavouriteItems.clear();
+                allFavouriteItems.addAll(favouriteItems);
+
+                binding.favouriteView.setLayoutManager(
+                        new GridLayoutManager(requireContext(), 2)
+                );
+                binding.favouriteView.setAdapter(new FavouriteAdapter(new ArrayList<>(allFavouriteItems)));
+                binding.favouriteView.setNestedScrollingEnabled(true);
+            } else {
+                allFavouriteItems.clear();
+                binding.favouriteView.setAdapter(new FavouriteAdapter(new ArrayList<>()));
+            }
+            binding.progressBarPopular.setVisibility(View.GONE);
+        });
+    }
+
+    private void filterFavouriteItems(String query) {
+        ArrayList<ItemsModel> filteredItems = new ArrayList<>();
+        for (ItemsModel item : allFavouriteItems) {
+            if (item.getTitle().toLowerCase().contains(query.toLowerCase())) {
+                filteredItems.add(item);
+            }
         }
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_favourite, container, false);
+        binding.favouriteView.setAdapter(new FavouriteAdapter(filteredItems));
     }
 }

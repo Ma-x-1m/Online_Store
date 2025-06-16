@@ -1,106 +1,110 @@
 package com.example.onlinestore.Activity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.View;
 import android.view.WindowManager;
+import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager2.widget.CompositePageTransformer;
-import androidx.viewpager2.widget.MarginPageTransformer;
+import androidx.fragment.app.Fragment;
 
-import com.example.onlinestore.Adapter.CategoryAdapter;
-import com.example.onlinestore.Adapter.PopularAdapter;
-import com.example.onlinestore.Adapter.SliderAdapter;
-import com.example.onlinestore.Domain.BannerModel;
+import com.example.onlinestore.Fragment.CartFragment;
+import com.example.onlinestore.Fragment.FavouriteFragment;
+import com.example.onlinestore.Fragment.HomeFragment;
+import com.example.onlinestore.Fragment.ProfileFragment;
 import com.example.onlinestore.R;
-import com.example.onlinestore.ViewModel.MainViewModel;
 import com.example.onlinestore.databinding.ActivityMainBinding;
+import com.google.firebase.auth.FirebaseAuth;
 import com.ismaeldivita.chipnavigation.ChipNavigationBar;
-
-import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
-    private MainViewModel viewModel;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         setContentView(binding.getRoot());
-        viewModel = new MainViewModel();
-        initCategory();
-        initSlider();
-        initPopular();
-        bottomNavigarion();
+
+        // Показываем стартовый фрагмент
+        if (savedInstanceState == null) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, new HomeFragment())
+                    .commit();
+        }
+
+        setupBottomNavigation();
+
+        SharedPreferences prefs = getSharedPreferences("UserData", MODE_PRIVATE);
+        boolean isDemo = prefs.getBoolean("isDemoUser", false);
+
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            Toast.makeText(this, "Вы используете демоверсию, пожалуйста войдите", Toast.LENGTH_SHORT).show();
+            return;
+        }
     }
 
-    private void bottomNavigarion() {
+    private void setupBottomNavigation() {
         binding.bottomNavigation.setItemSelected(R.id.home, true);
+
         binding.bottomNavigation.setOnItemSelectedListener(new ChipNavigationBar.OnItemSelectedListener() {
             @Override
-            public void onItemSelected(int i) {
+            public void onItemSelected(int id) {
+                Fragment fragment = null;
 
+                if (id == R.id.home) {
+                    fragment = new HomeFragment();
+
+                } else if (id == R.id.favourites) {
+                    if (isDemoUser()) {
+                        showRegisterDialog();
+                        return;
+                    }
+                    fragment = new FavouriteFragment();
+
+                } else if (id == R.id.cart) {
+                    if (isDemoUser()) {
+                        showRegisterDialog();
+                        return;
+                    }
+                    fragment = new CartFragment();
+
+                } else if (id == R.id.profile) {
+                    if (isDemoUser()) {
+                        showRegisterDialog();
+                        return;
+                    }
+                    fragment = new ProfileFragment();
+                }
+
+                if (fragment != null) {
+                    getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace(R.id.fragment_container, fragment)
+                            .commit();
+                }
             }
         });
 
-        binding.cartBtn.setOnClickListener(v -> startActivity
-                (new Intent(MainActivity.this, CartActivity.class)));
     }
 
-    private void initPopular() {
-        binding.progressBarPopular.setVisibility(View.VISIBLE);
-        viewModel.loadPopular().observeForever(itemsModels -> {
-            if(!itemsModels.isEmpty()){
-                binding.popularView.setLayoutManager(new LinearLayoutManager
-                        (MainActivity.this, LinearLayoutManager.HORIZONTAL, false));
-                binding.popularView.setAdapter(new PopularAdapter(itemsModels));
-                binding.popularView.setNestedScrollingEnabled(true);
-            }
-            binding.progressBarPopular.setVisibility(View.GONE);
-        });
-        viewModel.loadPopular();
+    private boolean isDemoUser() {
+        // Если пользователь не авторизован через Firebase, считаем его демо-пользователем
+        return FirebaseAuth.getInstance().getCurrentUser() == null;
     }
 
-    private void initSlider() {
-        binding.progressBarSlider.setVisibility(View.VISIBLE);
-        viewModel.loadBanner().observeForever(bannerModels -> {
-            if(bannerModels != null && !bannerModels.isEmpty()){
-                banners(bannerModels);
-                binding.progressBarSlider.setVisibility(View.GONE);
-            }
-        });
-
-        viewModel.loadBanner();
-    }
-
-    private void banners(ArrayList<BannerModel> bannerModels) {
-        binding.viewPagerSlider.setAdapter(new SliderAdapter(bannerModels,binding.viewPagerSlider));
-        binding.viewPagerSlider.setClipToPadding(false);
-        binding.viewPagerSlider.setClipChildren(false);
-        binding.viewPagerSlider.setOffscreenPageLimit(3);
-        binding.viewPagerSlider.getChildAt(0).setOverScrollMode(RecyclerView.OVER_SCROLL_ALWAYS);
-
-        CompositePageTransformer compositePageTransformer = new CompositePageTransformer();
-        compositePageTransformer.addTransformer(new MarginPageTransformer(40));
-
-        binding.viewPagerSlider.setPageTransformer(compositePageTransformer);
-    }
-
-    private void initCategory() {
-        binding.progressBarCategory.setVisibility(View.VISIBLE);
-        viewModel.loadCategory().observeForever(categoryModels -> {
-            binding.categoryView.setLayoutManager(new LinearLayoutManager(
-                    MainActivity.this, LinearLayoutManager.HORIZONTAL, false));
-            binding.categoryView.setAdapter(new CategoryAdapter(categoryModels));
-            binding.categoryView.setNestedScrollingEnabled(true);
-            binding.progressBarCategory.setVisibility(View.GONE);
-        });
+    private void showRegisterDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("Только для зарегистрированных")
+                .setMessage("Пожалуйста, зарегистрируйтесь или войдите, чтобы использовать эту функцию.")
+                .setPositiveButton("Зарегистрироваться", (dialog, which) -> {
+                    startActivity(new Intent(this, RegisterActivity.class));
+                })
+                .setNegativeButton("Отмена", null)
+                .show();
     }
 }

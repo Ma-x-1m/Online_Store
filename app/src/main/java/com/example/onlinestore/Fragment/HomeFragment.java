@@ -2,65 +2,143 @@ package com.example.onlinestore.Fragment;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.CompositePageTransformer;
+import androidx.viewpager2.widget.MarginPageTransformer;
 
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.content.Intent;
+import android.widget.Toast;
 
-import com.example.onlinestore.R;
+import com.example.onlinestore.Adapter.CategoryAdapter;
+import com.example.onlinestore.Adapter.PopularAdapter;
+import com.example.onlinestore.Adapter.SliderAdapter;
+import com.example.onlinestore.Domain.BannerModel;
+import com.example.onlinestore.Domain.ItemsModel;
+import com.example.onlinestore.ViewModel.MainViewModel;
+import com.example.onlinestore.databinding.FragmentHomeBinding;
+import com.example.onlinestore.Activity.CartActivity;
+import com.google.firebase.auth.FirebaseAuth;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link HomeFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+import java.util.ArrayList;
+
 public class HomeFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private FragmentHomeBinding binding;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private MainViewModel viewModel;
 
-    public HomeFragment() {
-        // Required empty public constructor
-    }
+    private ArrayList<ItemsModel> allPopularItems = new ArrayList<>();
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment HomeFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static HomeFragment newInstance(String param1, String param2) {
-        HomeFragment fragment = new HomeFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
+    @Nullable
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        binding = FragmentHomeBinding.inflate(inflater, container, false);
+        requireActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+
+        viewModel = new MainViewModel();
+
+        binding.searchTxt.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                filterPopularItems(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) { }
+        });
+
+        initCategory();
+        initSlider();
+        initPopular();
+        setupBottomNavigation();
+
+
+
+        return binding.getRoot();
+    }
+
+    private void setupBottomNavigation() {
+        binding.cartBtn.setOnClickListener(v -> {
+            if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+                Toast.makeText(requireContext(), "Пожалуйста, зарегистрируйтесь, чтобы перейти в корзину", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            Toast.makeText(requireContext(), "Переходим в корзину", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(requireContext(), CartActivity.class));
+        });
+    }
+
+    private void initPopular() {
+        binding.progressBarPopular.setVisibility(View.VISIBLE);
+        viewModel.loadPopular().observe(getViewLifecycleOwner(), itemsModels -> {
+            if (itemsModels != null && !itemsModels.isEmpty()) {
+                allPopularItems.clear();
+                allPopularItems.addAll(itemsModels);
+
+                binding.popularView.setLayoutManager(
+                        new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+                binding.popularView.setAdapter(new PopularAdapter(new ArrayList<>(allPopularItems)));
+                binding.popularView.setNestedScrollingEnabled(true);
+            }
+            binding.progressBarPopular.setVisibility(View.GONE);
+        });
+    }
+
+    private void initSlider() {
+        binding.progressBarSlider.setVisibility(View.VISIBLE);
+        viewModel.loadBanner().observe(getViewLifecycleOwner(), bannerModels -> {
+            if (bannerModels != null && !bannerModels.isEmpty()) {
+                setupSlider(bannerModels);
+                binding.progressBarSlider.setVisibility(View.GONE);
+            }
+        });
+    }
+
+    private void setupSlider(ArrayList<BannerModel> bannerModels) {
+        binding.viewPagerSlider.setAdapter(new SliderAdapter(bannerModels, binding.viewPagerSlider));
+        binding.viewPagerSlider.setClipToPadding(false);
+        binding.viewPagerSlider.setClipChildren(false);
+        binding.viewPagerSlider.setOffscreenPageLimit(3);
+        binding.viewPagerSlider.getChildAt(0).setOverScrollMode(RecyclerView.OVER_SCROLL_ALWAYS);
+
+        CompositePageTransformer transformer = new CompositePageTransformer();
+        transformer.addTransformer(new MarginPageTransformer(40));
+        binding.viewPagerSlider.setPageTransformer(transformer);
+    }
+
+    private void initCategory() {
+        binding.progressBarCategory.setVisibility(View.VISIBLE);
+        viewModel.loadCategory().observe(getViewLifecycleOwner(), categoryModels -> {
+            binding.categoryView.setLayoutManager(
+                    new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+            binding.categoryView.setAdapter(new CategoryAdapter(categoryModels));
+            binding.categoryView.setNestedScrollingEnabled(true);
+            binding.progressBarCategory.setVisibility(View.GONE);
+        });
+    }
+
+    private void filterPopularItems(String query) {
+        ArrayList<ItemsModel> filteredItems = new ArrayList<>();
+        for (ItemsModel item : allPopularItems) {
+            if (item.getTitle().toLowerCase().contains(query.toLowerCase())) {
+                filteredItems.add(item);
+            }
         }
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_home, container, false);
+        binding.popularView.setAdapter(new PopularAdapter(filteredItems));
     }
 }

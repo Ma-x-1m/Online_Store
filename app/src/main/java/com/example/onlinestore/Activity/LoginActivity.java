@@ -1,6 +1,7 @@
 package com.example.onlinestore.Activity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Patterns;
 import android.view.WindowManager;
@@ -25,7 +26,7 @@ public class LoginActivity extends AppCompatActivity {
     private ActivityLoginBinding binding;
 
     private TextInputEditText emailEt, passEt;
-    private AppCompatButton loginBtn, googleLoginBtn;
+    private AppCompatButton loginBtn, googleLoginBtn, demoBtn;
     private FirebaseAuth mAuth;
 
     private GoogleSignInClient googleSignInClient;
@@ -51,6 +52,7 @@ public class LoginActivity extends AppCompatActivity {
         passEt = findViewById(com.example.onlinestore.R.id.passEt);
         loginBtn = findViewById(com.example.onlinestore.R.id.login_btn);
         googleLoginBtn = findViewById(com.example.onlinestore.R.id.google_login);
+        demoBtn = findViewById(R.id.demoBtn);
         TextView fromLoginToRegister = findViewById(com.example.onlinestore.R.id.from_login_to_register);
 
         mAuth = FirebaseAuth.getInstance();
@@ -71,6 +73,15 @@ public class LoginActivity extends AppCompatActivity {
 
         // === Google вход ===
         googleLoginBtn.setOnClickListener(v -> loginWithGoogle());
+
+        demoBtn.setOnClickListener(v -> {
+            SharedPreferences prefs = getSharedPreferences("UserData", MODE_PRIVATE);
+            prefs.edit().putBoolean("isDemoUser", true).apply();
+
+            Toast.makeText(this, "Вы вошли в демо-режиме", Toast.LENGTH_SHORT).show();
+            goToHome();
+        });
+
 
         // Переход к регистрации
         fromLoginToRegister.setOnClickListener(v -> {
@@ -121,6 +132,8 @@ public class LoginActivity extends AppCompatActivity {
         // Попытка входа через Firebase
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnSuccessListener(authResult -> {
+                    SharedPreferences prefs = getSharedPreferences("UserData", MODE_PRIVATE);
+                    prefs.edit().putString("userEmail", email).apply();
                     Toast.makeText(this, "Успешный вход", Toast.LENGTH_SHORT).show();
                     goToHome();
                 })
